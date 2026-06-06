@@ -24,9 +24,15 @@ tarfm_python/
 
 ## Cách chạy chương trình
 
-Bạn có thể chạy dự án trực tiếp thông qua tệp `src/main.py`. Mặc định, chương trình được cấu hình để chạy trực tiếp trên bộ dữ liệu `foodmartFIM`.
+Đầu tiên, bạn cần di chuyển thư mục hiện tại (CWD) vào đúng thư mục mã nguồn:
 
-Mở terminal và gõ:
+```bash
+cd tarfm_python
+```
+
+Sau đó, bạn có thể chạy dự án trực tiếp thông qua tệp `src/main.py`. Mặc định, chương trình được cấu hình để chạy trực tiếp trên bộ dữ liệu `foodmartFIM`.
+
+Mở terminal và gõ lệnh:
 ```bash
 python src/main.py
 ```
@@ -55,9 +61,10 @@ python src/main.py --tx "đường/dẫn/đến/transactions.txt" \
 
 ### Chạy Unittest
 
-Để kiểm tra độ chính xác của các thuật toán so với bài báo gốc (Sử dụng dữ liệu mẫu nhỏ `data/sample/transactions.txt`), bạn hãy chạy bộ kiểm thử:
+Để kiểm tra độ chính xác của các thuật toán so với bài báo gốc (Sử dụng dữ liệu mẫu nhỏ `data/sample/transactions.txt`), bạn hãy chắc chắn đang đứng ở thư mục `tarfm_python` và chạy bộ kiểm thử:
 
 ```bash
 python -m unittest discover -s tests
 ```
+*(Nếu bạn đang ở bên ngoài thư mục `tarfm_python`, hãy gọi `cd tarfm_python` trước khi chạy).*
 Nếu mọi thứ chính xác, kết quả sẽ in ra `OK`.
