@@ -29,14 +29,19 @@ class DatabaseReader:
                     if len(parts) == 2:
                         item_id = parts[0].strip()
                         qty = float(parts[1].strip())
+                    elif len(parts) == 1:
+                        item_id = parts[0].strip()
+                        qty = 1.0
+                    else:
+                        continue
                         
-                        # Lấy external utility p(x)
-                        price = utility_map.get(item_id, 0.0)
-                        
-                        # u(x, Tj) = p(x) * q(x)
-                        item_utility = price * qty
-                        
-                        tx.add_item(item_id, item_utility)
+                    # Lấy external utility p(x), mặc định là 1.0 nếu không có
+                    price = utility_map.get(item_id, 1.0)
+                    
+                    # u(x, Tj) = p(x) * q(x)
+                    item_utility = price * qty
+                    
+                    tx.add_item(item_id, item_utility)
                         
                 database.append(tx)
                 tid += 1
