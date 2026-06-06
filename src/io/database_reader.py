@@ -6,6 +6,9 @@ from .utility_reader import UtilityReader
 class DatabaseReader:
     """Đọc transactions từ file và kết hợp với external utility"""
     
+    def __init__(self):
+        self.item_translation: Dict[str, str] = {}
+        
     def read(self, tx_file: str, util_file: str) -> List[Transaction]:
         utility_reader = UtilityReader()
         utility_map = utility_reader.read(util_file)
@@ -19,6 +22,14 @@ class DatabaseReader:
             for line in f:
                 line = line.strip()
                 if not line or line.startswith('#'):
+                    continue
+                if line.startswith('@'):
+                    if line.startswith('@ITEM='):
+                        parts = line.split('=', 2)
+                        if len(parts) >= 3:
+                            item_id = parts[1].strip()
+                            item_name = parts[2].strip()
+                            self.item_translation[item_id] = item_name
                     continue
                     
                 tx = Transaction(tid)

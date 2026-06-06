@@ -76,33 +76,51 @@ class GetTaRFMPatterns:
         """
         Giao hai RFM-List nodes: X ∩ Y → XY
         Tìm Tid chung, tính iutil và rutil mới.
+        Sử dụng thuật toán hai con trỏ tối ưu hóa vì triples được sắp xếp theo tid tăng dần.
         """
-        # Itemset mới = X.itemset ∪ {Y.last_item}
         new_itemset = list(node_x.get_itemset())
         new_itemset.append(node_y.get_itemset()[-1])
 
         node_xy = RFMListNode(new_itemset)
 
-        # Map Tid → triple của X và Y để giao nhanh
-        x_map: Dict[int, RFMTriple] = {t.get_tid(): t for t in node_x.get_triples()}
+        x_triples = node_x.get_triples()
+        y_triples = node_y.get_triples()
+        p_triples = p_node.get_triples() if p_node is not None else []
 
-        for ty in node_y.get_triples():
-            tx = x_map.get(ty.get_tid())
-            if tx is None:
-                continue  # Tid không chung
+        i, j, k = 0, 0, 0
+        len_x, len_y, len_p = len(x_triples), len(y_triples), len(p_triples)
 
-            if p_node is None:
-                # Không có prefix chung → cộng đơn giản
-                new_iutil = tx.get_iutil() + ty.get_iutil()
+        while i < len_x and j < len_y:
+            tx = x_triples[i]
+            ty = y_triples[j]
+            tid_x = tx.get_tid()
+            tid_y = ty.get_tid()
+
+            if tid_x == tid_y:
+                if p_node is None:
+                    new_iutil = tx.get_iutil() + ty.get_iutil()
+                else:
+                    p_iutil = 0.0
+                    while k < len_p:
+                        tp = p_triples[k]
+                        tid_p = tp.get_tid()
+                        if tid_p == tid_x:
+                            p_iutil = tp.get_iutil()
+                            break
+                        elif tid_p < tid_x:
+                            k += 1
+                        else:
+                            break
+                    new_iutil = tx.get_iutil() + ty.get_iutil() - p_iutil
+
+                new_rutil = ty.get_rutil()
+                node_xy.add_triple(RFMTriple(tid_x, new_iutil, new_rutil))
+                i += 1
+                j += 1
+            elif tid_x < tid_y:
+                i += 1
             else:
-                # Có prefix chung → trừ utility của P-Node để tránh đếm trùng
-                p_iutil = self._get_p_node_iutil(p_node, ty.get_tid())
-                new_iutil = tx.get_iutil() + ty.get_iutil() - p_iutil
-
-            # rutil của XY = rutil của Y (vì Y đứng sau X trong TaRFM order)
-            new_rutil = ty.get_rutil()
-
-            node_xy.add_triple(RFMTriple(ty.get_tid(), new_iutil, new_rutil))
+                j += 1
 
         return node_xy
 
@@ -112,13 +130,6 @@ class GetTaRFMPatterns:
         for triple in node.get_triples():
             r += math.pow(1.0 - self.delta, self.tlast - triple.get_tid())
         return r
-
-    def _get_p_node_iutil(self, p_node: RFMListNode, tid: int) -> float:
-        """Lấy iutil của pNode tại Tid cụ thể"""
-        for t in p_node.get_triples():
-            if t.get_tid() == tid:
-                return t.get_iutil()
-        return 0.0
 
     def _is_last_query_item(self, item: str, prefix: List[str]) -> bool:
         """

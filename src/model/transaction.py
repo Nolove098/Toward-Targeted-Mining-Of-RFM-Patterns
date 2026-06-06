@@ -25,7 +25,7 @@ class Transaction:
         return self.item_utilities.get(item, 0.0)
 
     def contains_all(self, query_items: Set[str]) -> bool:
-        return query_items.issubset(set(self.items))
+        return all(item in self.item_utilities for item in query_items)
 
     def __str__(self):
         return f"Transaction(tid={self.tid}, items={self.items}, TU={self.transaction_utility})"
